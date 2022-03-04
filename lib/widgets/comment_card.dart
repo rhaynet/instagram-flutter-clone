@@ -22,27 +22,27 @@ class _CommentCardState extends State<CommentCard> {
             ),
             radius: 18,
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text: widget.snap['username'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                        text: widget.snap['name'].toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: ' ${widget.snap['text']}',
-                    ),
-                  ]),
-                ),
-                Expanded(
-                  child: Padding(
+                      TextSpan(
+                        text: ' ${widget.snap['text'].toString()}',
+                      ),
+                    ]),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.only(
                       top: 4,
                     ),
@@ -54,8 +54,8 @@ class _CommentCardState extends State<CommentCard> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Container(

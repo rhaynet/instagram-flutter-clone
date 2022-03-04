@@ -30,7 +30,7 @@ class _PostCardState extends State<PostCard> {
     getComments();
   }
 
-  void getComments() async {
+  getComments() async {
     try {
       QuerySnapshot snap = await FirebaseFirestore.instance
           .collection('posts')
@@ -43,6 +43,17 @@ class _PostCardState extends State<PostCard> {
     }
 
     setState(() {});
+  }
+
+  deletePost(String postId) async {
+    try {
+      await FirestoreMethods().deletePost(postId);
+    } catch (err) {
+      showSnackBar(
+        context,
+        err.toString(),
+      );
+    }
   }
 
   @override
@@ -62,7 +73,7 @@ class _PostCardState extends State<PostCard> {
                 CircleAvatar(
                   radius: 16,
                   backgroundImage: NetworkImage(
-                    widget.snap['profImage'],
+                    widget.snap['profImage'].toString(),
                   ),
                 ),
                 Expanded(
@@ -80,37 +91,43 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => Dialog(
-                              child: ListView(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shrinkWrap: true,
-                                children: [
-                                  'Delete',
-                                ]
-                                    .map((e) => InkWell(
-                                          onTap: () async{
-                                            FirestoreMethods().deletePost(widget.snap['postId']);
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                              horizontal: 16,
-                                            ),
-                                            child: Text(e),
-                                          ),
-                                        ))
-                                    .toList(),
-                              ),
-                            ));
-                  },
-                  icon: const Icon(Icons.more_vert),
-                ),
+                widget.snap['uid'].toString() == user.uid
+                    ? IconButton(
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                    child: ListView(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shrinkWrap: true,
+                                      children: [
+                                        'Delete',
+                                      ]
+                                          .map((e) => InkWell(
+                                                onTap: () async {
+                                                  FirestoreMethods().deletePost(
+                                                      widget.snap['postId']);
+                                                  // remove the dialog box
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    vertical: 12,
+                                                    horizontal: 16,
+                                                  ),
+                                                  child: Text(e),
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                  ));
+                        },
+                        icon: const Icon(Icons.more_vert),
+                      )
+                    : Container(),
               ],
             ),
           ),
@@ -177,12 +194,14 @@ class _PostCardState extends State<PostCard> {
                       widget.snap['likes'],
                     );
                   },
-                  icon: widget.snap['postId'].contains(user.uid)
+                  icon: widget.snap['likes'].contains(user.uid)
                       ? const Icon(
                           Icons.favorite,
                           color: Colors.red,
                         )
-                      : const Icon(Icons.favorite_border),
+                      : const Icon(
+                          Icons.favorite_border,
+                        ),
                 ),
               ),
               IconButton(
@@ -190,7 +209,7 @@ class _PostCardState extends State<PostCard> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => CommentScreen(
-                      snap: widget.snap,
+                      snap: widget.snap['postId'],
                     ),
                   ),
                 ),
@@ -252,7 +271,13 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CommentScreen(
+                        snap: widget.snap['postId'],
+                      ),
+                    ),
+                  ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: 4,

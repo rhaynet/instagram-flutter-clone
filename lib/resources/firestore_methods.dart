@@ -44,7 +44,8 @@ class FirestoreMethods {
   }
 
 
-  Future<void> likePost(String postId, String uid, List likes)async{
+  Future<String> likePost(String postId, String uid, List likes)async{
+    String res = "Some error occurred";
     try{
       if(likes.contains(uid)){
         _firestore.collection('posts').doc(postId).update({
@@ -55,39 +56,51 @@ class FirestoreMethods {
         'likes': FieldValue.arrayUnion([uid]),
         });
       }
+      res = 'success';
     }catch(e){
-      print(e.toString());
+      res = e.toString();
     }
+    return res;
   }
 
-  Future<void> postComment(String postId, String text, String uid,String name, String profilePic)async{
+  //post comment
+  Future<String> postComment(String postId, String text, String uid,String name, String profilePic)async{
+    String res = "Some error occurred";
     try{
-      String commentId = const Uuid().v1();
-      if(text.isNotEmpty){
-        await _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
-          'profilePic': profilePic,
-          'name' : name,
-          'uid' : uid,
-          'text': text,
-          'commentId': commentId,
-          'datePublished': DateTime.now(),
-        });
-      }else{
-        print('Text is empty');
+      if (text.isNotEmpty) {
+        String commentId = const Uuid().v1();
+        if (text.isNotEmpty) {
+          await _firestore.collection('posts').doc(postId).collection(
+              'comments').doc(commentId).set({
+            'profilePic': profilePic,
+            'name': name,
+            'uid': uid,
+            'text': text,
+            'commentId': commentId,
+            'datePublished': DateTime.now(),
+          });
+          res = 'success';
+        } else {
+          res = "Please enter text";
+        }
       }
     }catch(err){
-      print(err.toString());
+      res = err.toString();
     }
+    return res;
   }
 
 
   //deleting posts
-  Future<void> deletePost(String postId) async{
+  Future<String> deletePost(String postId) async{
+    String res = "Some error occurred";
     try{
       _firestore.collection('posts').doc(postId).delete();
+      res = 'success';
     }catch(e){
-      print(e.toString());
+      res = e.toString();
     }
+    return res;
   }
 
   Future<void> followUser(

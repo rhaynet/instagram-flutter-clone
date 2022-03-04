@@ -4,6 +4,7 @@ import 'package:instagram_clone/models/users.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/comment_card.dart';
 import 'package:provider/provider.dart';
 
@@ -27,6 +28,29 @@ class _CommentScreenState extends State<CommentScreen> {
     _commentEditingController.dispose();
   }
 
+  void postComment(String uid, String name, String profilePic) async {
+    try {
+      String res = await FirestoreMethods().postComment(
+        widget.snap,
+        _commentEditingController.text,
+        uid,
+        name,
+        profilePic,
+      );
+
+      if (res != 'success') {
+        showSnackBar(context, res);
+      }
+      setState(() {
+        _commentEditingController.text = "";
+      });
+    } catch (err) {
+      showSnackBar(
+        context,
+        err.toString(),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<UserProvider>(context).getUser;
@@ -39,9 +63,8 @@ class _CommentScreenState extends State<CommentScreen> {
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('posts')
-            .doc(widget.snap['postId'])
+            .doc(widget.snap)
             .collection('comments')
-            .orderBy('datePublished', descending: true)
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -52,6 +75,7 @@ class _CommentScreenState extends State<CommentScreen> {
           }
 
           return ListView.builder(
+            shrinkWrap: true,
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) => CommentCard(
               snap: snapshot.data!.docs[index].data(),
@@ -85,19 +109,11 @@ class _CommentScreenState extends State<CommentScreen> {
                 ),
               ),
               InkWell(
-                onTap: () async {
-                  await FirestoreMethods().postComment(
-                    widget.snap['postId'],
-                    _commentEditingController.text,
-                    user.uid,
-                    user.username,
-                    user.photoUrl,
-                  );
-
-                  setState(() {
-                    _commentEditingController.text = '';
-                  });
-                },
+                onTap: () => postComment(
+                  user.uid,
+                  user.username,
+                  user.photoUrl,
+                ),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 8),

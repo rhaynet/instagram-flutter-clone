@@ -28,13 +28,15 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         backgroundColor: mobileBackgroundColor,
         title: TextFormField(
+          controller: searchController,
           decoration: const InputDecoration(
-            labelText: 'Search for a user',
+            labelText: 'Search for a user...',
           ),
           onFieldSubmitted: (String _) {
             setState(() {
               isShowUsers = true;
             });
+            print(_);
           },
         ),
       ),
@@ -43,46 +45,47 @@ class _SearchScreenState extends State<SearchScreen> {
               future: FirebaseFirestore.instance
                   .collection('users')
                   .where('username',
-                      isGreaterThanOrEqualTo: searchController.text)
+                      isGreaterThanOrEqualTo: searchController.text,)
                   .get(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-                return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProfileScreen(uid: snapshot.data!.docs[index]['uid']),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            snapshot.data!.docs[index]['photoUrl'],
-                          ),
-                        ),
-                        title: snapshot.data!.docs[index]['username'],
-                      ),
-                    );
-                  },
-                );
-              },
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileScreen(uid: snapshot.data!.docs[index]['uid']),
+                    ),
+                  );
+                },
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      snapshot.data!.docs[index]['photoUrl'],
+                    ),
+                    radius: 16,
+                  ),
+                  title: Text(snapshot.data!.docs[index]['username']),
+                ),
+              );
+            },
+          );
+        },
             )
           : FutureBuilder(
-              future: FirebaseFirestore.instance.collection('posts').get(),
+              future: FirebaseFirestore.instance.collection('posts').orderBy('datePublished').get(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -91,14 +94,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     return Image.network(
-                        snapshot.data!.docs[index].data()['postUrl']);
+                        snapshot.data!.docs[index].data()['postUrl'], fit: BoxFit.cover,);
                   },
                   staggeredTileBuilder: (index) => StaggeredTile.count(
                     (index % 7 == 0) ? 2 : 1,
                     (index % 7 == 0) ? 2 : 1,
                   ),
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8.0,
+                  crossAxisSpacing: 8.0,
                 );
               },
             ),
