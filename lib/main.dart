@@ -15,7 +15,9 @@ void main() async {
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyBGUxhyS8b7lrLB-A77LelNif3E4WP7uq0",
+        authDomain: "instagram-clone-8e135.firebaseapp.com",
+        storageBucket: "instagram-clone-8e135.appspot.com",
+        apiKey: "AIzaSyB4dQa8BxZ4p0Qbk-eLK40ppehJgP85Cs0",//"AIzaSyBGUxhyqS8b7lrLB-A77LelNif3E4WP7uq0",
         appId: "1:796295974495:web:6fd1e75d4e4e39c5bf95ea",
         messagingSenderId: "796295974495",
         projectId: "instagram-clone-8e135",

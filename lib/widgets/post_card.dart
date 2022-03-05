@@ -4,7 +4,9 @@ import 'package:instagram_clone/models/users.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/screens/comment_screen.dart';
+import 'package:instagram_clone/screens/profile_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/global_variable.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/like_animation.dart';
 import 'package:intl/intl.dart';
@@ -59,76 +61,94 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<UserProvider>(context).getUser;
+    final width = MediaQuery.of(context).size.width;
+
     return Container(
-      color: mobileBackgroundColor,
+      //boundary needed for web
+      decoration: BoxDecoration(
+        color: mobileBackgroundColor,
+        border: Border.all(
+          color: width > webScreenSize ? secondaryColor : mobileBackgroundColor,
+        ),
+      ),
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         children: [
           //HEADER SECTION
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16)
-                .copyWith(right: 0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: NetworkImage(
-                    widget.snap['profImage'].toString(),
-                  ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(uid: widget.snap['uid']),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.snap['username'],
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16)
+                  .copyWith(right: 0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundImage: NetworkImage(
+                      widget.snap['profImage'].toString(),
                     ),
                   ),
-                ),
-                widget.snap['uid'].toString() == user.uid
-                    ? IconButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => Dialog(
-                                    child: ListView(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      shrinkWrap: true,
-                                      children: [
-                                        'Delete',
-                                      ]
-                                          .map((e) => InkWell(
-                                                onTap: () async {
-                                                  FirestoreMethods().deletePost(
-                                                      widget.snap['postId']);
-                                                  // remove the dialog box
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    vertical: 12,
-                                                    horizontal: 16,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.snap['username'],
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  widget.snap['uid'].toString() == user.uid
+                      ? IconButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                      child: ListView(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        shrinkWrap: true,
+                                        children: [
+                                          'Delete',
+                                        ]
+                                            .map((e) => InkWell(
+                                                  onTap: () async {
+                                                    FirestoreMethods().deletePost(
+                                                        widget.snap['postId']);
+                                                    // remove the dialog box
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      vertical: 12,
+                                                      horizontal: 16,
+                                                    ),
+                                                    child: Text(e),
                                                   ),
-                                                  child: Text(e),
-                                                ),
-                                              ))
-                                          .toList(),
-                                    ),
-                                  ));
-                        },
-                        icon: const Icon(Icons.more_vert),
-                      )
-                    : Container(),
-              ],
+                                                ))
+                                            .toList(),
+                                      ),
+                                    ));
+                          },
+                          icon: const Icon(Icons.more_vert),
+                        )
+                      : Container(),
+                ],
+              ),
             ),
           ),
 
